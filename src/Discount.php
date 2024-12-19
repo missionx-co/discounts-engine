@@ -3,7 +3,6 @@
 namespace MissionX\DiscountsEngine;
 
 use Closure;
-use Money\Money;
 use RuntimeException;
 
 class Discount
@@ -22,7 +21,7 @@ class Discount
     /**
      * A set of products to which the discount is limited.
      *
-     * @param string[] $products
+     * @param  string[]  $products
      */
     public array $products = [];
 
@@ -41,36 +40,42 @@ class Discount
     public function combineWithOtherDiscounts(bool $canCombineWithOtherDiscounts = true): static
     {
         $this->canCombineWithOtherDiscounts = $canCombineWithOtherDiscounts;
+
         return $this;
     }
 
     public function forceCombineWithOtherDiscounts(bool $forceCombineWithOtherDiscounts = true): static
     {
         $this->forceCombineWithOtherDiscounts = $forceCombineWithOtherDiscounts;
+
         return $this;
     }
 
     public function priority(int $priority = 0): static
     {
         $this->priority = $priority;
+
         return $this;
     }
 
     public function appliesToProducts(array $products): static
     {
         $this->products = $products;
+
         return $this;
     }
 
     public function minPurchaseAmount(float $amount): static
     {
         $this->minPurchaseAmount = $amount;
+
         return $this;
     }
 
     public function minQuantityAmount(float $amount): static
     {
         $this->minQuantityAmount = $amount;
+
         return $this;
     }
 
@@ -83,12 +88,13 @@ class Discount
     public function assertCanBeApplied(array $items, Closure $fail)
     {
         if (
-            !empty($this->products) && empty(array_intersect(
+            ! empty($this->products) && empty(array_intersect(
                 $this->products,
                 array_column($items, 'id')
             ))
         ) {
             $fail(Errors::get('limited-products'));
+
             return;
         }
 
@@ -96,9 +102,10 @@ class Discount
             $fail(
                 Errors::get('min-purchase-violation', [
                     '@subtotal' => number_format($total),
-                    '@minPurchaseAmount' => number_format($this->minPurchaseAmount)
+                    '@minPurchaseAmount' => number_format($this->minPurchaseAmount),
                 ])
             );
+
             return;
         }
 
@@ -106,9 +113,10 @@ class Discount
             $fail(
                 Errors::get('min-purchase-violation', [
                     '@quantity' => $total,
-                    '@minQuantity' => $this->minQuantityAmount
+                    '@minQuantity' => $this->minQuantityAmount,
                 ])
             );
+
             return;
         }
     }
@@ -155,7 +163,7 @@ class Discount
     public function getItemsTotal(array $items): float
     {
         return array_reduce($items, function (float $total, Item $item) {
-            if (!empty($this->products) && !in_array($item->id, $this->products)) {
+            if (! empty($this->products) && ! in_array($item->id, $this->products)) {
                 return $total;
             }
 
@@ -171,7 +179,7 @@ class Discount
     public function getItemsTotalQty(array $items)
     {
         return array_reduce($items, function (float $total, Item $item) {
-            if (!empty($this->products) && !in_array($item->id, $this->products)) {
+            if (! empty($this->products) && ! in_array($item->id, $this->products)) {
                 return $total;
             }
 

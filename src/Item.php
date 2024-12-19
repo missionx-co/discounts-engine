@@ -2,8 +2,6 @@
 
 namespace MissionX\DiscountsEngine;
 
-use MohammedManssour\DTO\Concerns\AsDTO;
-
 class Item
 {
     public function __construct(
