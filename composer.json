@@ -1,0 +1,49 @@
+{
+    "name": "missionx-co/discounts-engine",
+    "description": "Flexible and developer-friendly solution for creating, managing, and validating discount rules in PHP application",
+    "keywords": [
+        "missionx-co",
+        "discounts-engine"
+    ],
+    "homepage": "https://github.com/missionx-co/discounts-engine",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mohammed Manssour",
+            "email": "mohammed@missionx.co",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.3.2",
+        "laravel/pint": "^1.0",
+        "spatie/ray": "^1.28"
+    },
+    "autoload": {
+        "psr-4": {
+            "MissionX\\DiscountsEngine\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MissionX\\DiscountsEngine\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+            "test-coverage": "vendor/bin/phpunit --coverage",
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+
+            "phpstan/extension-installer": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
