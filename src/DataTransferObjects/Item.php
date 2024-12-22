@@ -1,6 +1,6 @@
 <?php
 
-namespace MissionX\DiscountsEngine;
+namespace MissionX\DiscountsEngine\DataTransferObjects;
 
 class Item
 {
@@ -11,14 +11,24 @@ class Item
         public string $id,
 
         /**
+         * item identifier
+         */
+        public string $name,
+
+        /**
          * item qty
          */
-        public float $qty,
+        public int $qty,
 
         /**
          * iitem unit price
          */
         public float $price,
+
+        /**
+         * Item type
+         */
+        public string $type = 'unkown',
 
         /**
          * amount discounted from the total price = (price * qty)

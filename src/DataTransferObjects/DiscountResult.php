@@ -1,6 +1,6 @@
 <?php
 
-namespace MissionX\DiscountsEngine;
+namespace MissionX\DiscountsEngine\DataTransferObjects;
 
 class DiscountResult
 {
@@ -22,4 +22,9 @@ class DiscountResult
 
         public ?string $error = null,
     ) {}
+
+    public function wasApplied(): bool
+    {
+        return is_null($this->error);
+    }
 }
