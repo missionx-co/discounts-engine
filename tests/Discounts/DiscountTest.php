@@ -21,7 +21,7 @@ class DiscountTest extends TestCase
     {
         $discount = invade(
             $this->discount()
-                ->limitToProducts($products)
+                ->limitToItems($products)
                 ->applyTo($this->items())
         );
 
@@ -55,7 +55,7 @@ class DiscountTest extends TestCase
     public function it_asserts_it_can_be_applied($canBeApplied, $minPurchaseAmount, $minQty)
     {
         $discount = $this->discount()
-            ->limitToProducts(fn(Item $item) => $item->type == 'product')
+            ->limitToItems(fn(Item $item) => $item->type == 'product')
             ->minPurchaseAmount($minPurchaseAmount)
             ->minQty($minQty)
             ->applyTo($this->items());

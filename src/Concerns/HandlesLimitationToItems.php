@@ -4,14 +4,14 @@ namespace MissionX\DiscountsEngine\Concerns;
 
 use MissionX\DiscountsEngine\DataTransferObjects\Item;
 
-trait HandlesLimitationToProducts
+trait HandlesLimitationToItems
 {
     /**
      * select the applicable products
      *
      * @var callable(Item $item): bool
      */
-    protected $productSelector;
+    protected $itemsSelector;
 
     /**
      * Applicable Items
@@ -22,9 +22,9 @@ trait HandlesLimitationToProducts
 
     protected array $applicableItems;
 
-    public function limitToProducts(callable $productSelector): static
+    public function limitToItems(callable $itemsSelector): static
     {
-        $this->productSelector = $productSelector;
+        $this->itemsSelector = $itemsSelector;
 
         return $this;
     }
@@ -36,9 +36,9 @@ trait HandlesLimitationToProducts
     {
         $this->items = $items;
 
-        $this->applicableItems = !isset($this->productSelector)
+        $this->applicableItems = !isset($this->itemsSelector)
             ? $items
-            : array_filter($items, $this->productSelector);
+            : array_filter($items, $this->itemsSelector);
 
         return $this;
     }

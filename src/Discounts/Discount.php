@@ -6,7 +6,7 @@ use Closure;
 use MissionX\DiscountsEngine\Errors;
 use MissionX\DiscountsEngine\Concerns\HasMinQuantityRequirement;
 use MissionX\DiscountsEngine\DataTransferObjects\DiscountResult;
-use MissionX\DiscountsEngine\Concerns\HandlesLimitationToProducts;
+use MissionX\DiscountsEngine\Concerns\HandlesLimitationToItems;
 use MissionX\DiscountsEngine\Concerns\HasMinPurchaseAmountRequirement;
 use MissionX\DiscountsEngine\Concerns\HandlesCombiningWithOtherDiscounts;
 
@@ -15,7 +15,7 @@ abstract class Discount
     use HasMinPurchaseAmountRequirement,
         HasMinQuantityRequirement,
         HandlesCombiningWithOtherDiscounts,
-        HandlesLimitationToProducts;
+        HandlesLimitationToItems;
 
     public function __construct(public ?string $name = null) {}
 

@@ -38,11 +38,10 @@ class DiscountsEngine
     public function process(array $items): static
     {
         $this->setItems($items);
-        $discounts = $this->determineDiscountsThatShouldBeApplied();
+        $this->appliedDiscounts = $this->determineDiscountsThatShouldBeApplied();
 
-        foreach ($discounts as $discount) {
+        foreach ($this->appliedDiscounts as $discount) {
             $result = $discount->applyTo($this->items)->calculate();
-            $this->appliedDiscounts[] = $result;
             // we need each discount to have it's information for the savings that that was done
             $this->items = $this->clone($result->items);
         }

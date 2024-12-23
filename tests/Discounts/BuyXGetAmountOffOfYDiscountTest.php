@@ -19,7 +19,7 @@ class BuyXGetAmountOffOfYDiscountTest extends TestCase
     {
         $discount = (new BuyXGetAmountOffOfYDiscount())
             ->amount(50, DiscountType::Percentage)
-            ->limitToProducts(fn(Item $item) => $item->type == 'product')
+            ->limitToItems(fn(Item $item) => $item->type == 'product')
             ->hasX(fn(Item $item) => $item->id == 2 & $item->qty == 2)
             ->getY(fn(array $items) => [new YItem(1)])
             ->applyTo($this->items())
@@ -37,7 +37,7 @@ class BuyXGetAmountOffOfYDiscountTest extends TestCase
     {
         $discount = (new BuyXGetAmountOffOfYDiscount())
             ->amount(100, DiscountType::Percentage)
-            ->limitToProducts(fn(Item $item) => $item->type == 'product')
+            ->limitToItems(fn(Item $item) => $item->type == 'product')
             ->minPurchaseAmount(200)
             ->getY(fn(array $items) => [new YItem(3)])
             ->applyTo($this->items())
