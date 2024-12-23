@@ -3,19 +3,19 @@
 namespace MissionX\DiscountsEngine\Discounts;
 
 use Closure;
-use MissionX\DiscountsEngine\Errors;
-use MissionX\DiscountsEngine\Concerns\HasMinQuantityRequirement;
-use MissionX\DiscountsEngine\DataTransferObjects\DiscountResult;
+use MissionX\DiscountsEngine\Concerns\HandlesCombiningWithOtherDiscounts;
 use MissionX\DiscountsEngine\Concerns\HandlesLimitationToItems;
 use MissionX\DiscountsEngine\Concerns\HasMinPurchaseAmountRequirement;
-use MissionX\DiscountsEngine\Concerns\HandlesCombiningWithOtherDiscounts;
+use MissionX\DiscountsEngine\Concerns\HasMinQuantityRequirement;
+use MissionX\DiscountsEngine\DataTransferObjects\DiscountResult;
+use MissionX\DiscountsEngine\Errors;
 
 abstract class Discount
 {
-    use HasMinPurchaseAmountRequirement,
-        HasMinQuantityRequirement,
-        HandlesCombiningWithOtherDiscounts,
-        HandlesLimitationToItems;
+    use HandlesCombiningWithOtherDiscounts,
+        HandlesLimitationToItems,
+        HasMinPurchaseAmountRequirement,
+        HasMinQuantityRequirement;
 
     public function __construct(public ?string $name = null) {}
 
@@ -66,6 +66,7 @@ abstract class Discount
 
         // make sure to keep the original full list
         $result->items = $this->items;
+
         return $result;
     }
 

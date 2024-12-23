@@ -2,12 +2,12 @@
 
 namespace MissionX\DiscountsEngine\Tests\Discounts;
 
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\Attributes\Test;
-use MissionX\DiscountsEngine\Tests\HasTestItems;
 use MissionX\DiscountsEngine\DataTransferObjects\Item;
 use MissionX\DiscountsEngine\Discounts\AmountOffProductDiscount;
 use MissionX\DiscountsEngine\Enums\DiscountType;
+use MissionX\DiscountsEngine\Tests\HasTestItems;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 class AmountOffProductDiscountTest extends TestCase
 {
@@ -16,9 +16,9 @@ class AmountOffProductDiscountTest extends TestCase
     #[Test]
     public function it_apply_discount_that_is_limited_to_products_only()
     {
-        $discountResult = (new AmountOffProductDiscount())
+        $discountResult = (new AmountOffProductDiscount)
             ->amount(20)
-            ->limitToItems(fn(Item $item) => $item->type == 'product')
+            ->limitToItems(fn (Item $item) => $item->type == 'product')
             ->minPurchaseAmount(200)
             ->applyTo($this->items())
             ->calculate();
@@ -34,10 +34,10 @@ class AmountOffProductDiscountTest extends TestCase
     #[Test]
     public function it_apply_discount_to_a_specific_product_only()
     {
-        $discountResult = (new AmountOffProductDiscount())
+        $discountResult = (new AmountOffProductDiscount)
             ->amount(20, DiscountType::FixedAmount)
-            ->limitToItems(fn(Item $item) => $item->type == 'product')
-            ->selectAffectedItemsUsing(fn(Item $item) => $item->id == 2)
+            ->limitToItems(fn (Item $item) => $item->type == 'product')
+            ->selectAffectedItemsUsing(fn (Item $item) => $item->id == 2)
             ->minPurchaseAmount(200)
             ->applyTo($this->items())
             ->calculate();

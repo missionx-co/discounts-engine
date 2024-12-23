@@ -2,11 +2,8 @@
 
 namespace MissionX\DiscountsEngine\Discounts;
 
-use Closure;
 use MissionX\DiscountsEngine\Concerns\HasAmount;
-use MissionX\DiscountsEngine\Enums\DiscountType;
 use MissionX\DiscountsEngine\DataTransferObjects\DiscountResult;
-
 
 class AmountOffOrderDiscount extends Discount
 {

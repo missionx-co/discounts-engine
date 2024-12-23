@@ -15,25 +15,26 @@ class DiscountsEngine
     /**
      * The Discounts that will be applied to items
      *
-     * @var \MissionX\DiscountsEngine\Discount[] $discounts
+     * @var \MissionX\DiscountsEngine\Discount[]
      */
     public array $discounts = [];
 
     /**
      * Discounts that were applied to items
      *
-     * @var \MissionX\DiscountsEngine\Discount[] $discounts
+     * @var \MissionX\DiscountsEngine\Discount[]
      */
     public array $appliedDiscounts = [];
 
     public function addDiscount(Discount $discount): static
     {
         $this->discounts[] = $discount;
+
         return $this;
     }
 
     /**
-     * @param Item[] $items
+     * @param  Item[]  $items
      */
     public function process(array $items): static
     {
@@ -56,12 +57,12 @@ class DiscountsEngine
 
     public function savings(): float
     {
-        return array_reduce($this->appliedDiscounts, fn(float $total, DiscountResult $result) => $total + $result->savings, 0);
+        return array_reduce($this->appliedDiscounts, fn (float $total, DiscountResult $result) => $total + $result->savings, 0);
     }
 
     public function totalBeforeDiscount(): float
     {
-        return array_reduce($this->originalItems, fn(float $total, Item $item) => $total + $item->total(), 0);
+        return array_reduce($this->originalItems, fn (float $total, Item $item) => $total + $item->total(), 0);
     }
 
     public function details()
@@ -70,7 +71,7 @@ class DiscountsEngine
     }
 
     /**
-     * @param Item[] $items
+     * @param  Item[]  $items
      */
     public function setItems(array $items): static
     {
@@ -100,13 +101,13 @@ class DiscountsEngine
         $this->sortDiscountsByPriority();
         /** @var Discount */
         $highestPriorityDiscount = $this->discounts[0];
-        if (!$highestPriorityDiscount->canCombineWithOtherDiscounts && !$highestPriorityDiscount->forceCombineWithOtherDiscounts) {
+        if (! $highestPriorityDiscount->canCombineWithOtherDiscounts && ! $highestPriorityDiscount->forceCombineWithOtherDiscounts) {
             // get the highest priority discount and other discounts that we're forced to combine with the others
-            return array_filter($this->discounts, fn(Discount $discount) => $discount == $highestPriorityDiscount || $discount->forceCombineWithOtherDiscounts);
+            return array_filter($this->discounts, fn (Discount $discount) => $discount == $highestPriorityDiscount || $discount->forceCombineWithOtherDiscounts);
         }
 
         // get all discounts that can be combined and the we're foced to combine
-        return array_filter($this->discounts, fn(Discount $discount) => $discount->canCombineWithOtherDiscounts || $discount->forceCombineWithOtherDiscounts);
+        return array_filter($this->discounts, fn (Discount $discount) => $discount->canCombineWithOtherDiscounts || $discount->forceCombineWithOtherDiscounts);
     }
 
     protected function clone(array $items): array
@@ -115,6 +116,7 @@ class DiscountsEngine
         foreach ($items as $key => $item) {
             $clone[$key] = clone $item;
         }
+
         return $clone;
     }
 }

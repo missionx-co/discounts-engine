@@ -2,14 +2,12 @@
 
 namespace MissionX\DiscountsEngine\Discounts;
 
-use Error;
 use Closure;
-use MissionX\DiscountsEngine\Errors;
 use MissionX\DiscountsEngine\Concerns\HasAmount;
-use MissionX\DiscountsEngine\Enums\DiscountType;
+use MissionX\DiscountsEngine\DataTransferObjects\DiscountResult;
 use MissionX\DiscountsEngine\DataTransferObjects\Item;
 use MissionX\DiscountsEngine\DataTransferObjects\YItem;
-use MissionX\DiscountsEngine\DataTransferObjects\DiscountResult;
+use MissionX\DiscountsEngine\Errors;
 
 class BuyXGetAmountOffOfYDiscount extends Discount
 {
@@ -20,7 +18,7 @@ class BuyXGetAmountOffOfYDiscount extends Discount
     /**
      * return the items that should be provided for free
      *
-     * @var callable(Item[] $items, Discount $discount): YItem[] $getY
+     * @var callable(Item[], Discount): YItem[]
      */
     protected $getY;
 
@@ -31,21 +29,22 @@ class BuyXGetAmountOffOfYDiscount extends Discount
     }
 
     /**
-     * @param callable(Item $item): bool $hasX all provided items will be checked with this selector
+     * @param  callable(Item $item): bool  $hasX  all provided items will be checked with this selector
      */
     public function hasX(callable $hasX): static
     {
         $this->hasX = $hasX;
+
         return $this;
     }
 
     /**
-     *
-     * @param callable(Item[] $items, Discount $discount): YItem[] $getY
+     * @param  callable(Item[] $items, Discount $discount): YItem[]  $getY
      */
     public function getY(callable $getY): static
     {
         $this->getY = $getY;
+
         return $this;
     }
 
@@ -53,12 +52,12 @@ class BuyXGetAmountOffOfYDiscount extends Discount
     {
         parent::assertCanBeApplied($fail);
 
-        if (!isset($this->hasX)) {
+        if (! isset($this->hasX)) {
             return;
         }
 
         $items = array_filter($this->applicableItems, $this->hasX);
-        if (!empty($items)) {
+        if (! empty($items)) {
             return;
         }
 

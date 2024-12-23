@@ -4,8 +4,8 @@ namespace MissionX\DiscountsEngine\Tests\Enums;
 
 use MissionX\DiscountsEngine\Enums\DiscountType;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 class DiscountTypeTest extends TestCase
 {
@@ -23,17 +23,17 @@ class DiscountTypeTest extends TestCase
             'percentage' => [
                 'type' => DiscountType::Percentage,
                 'amount' => 20,
-                'expected' => 20
+                'expected' => 20,
             ],
             'fixed amount that is less than the provided total' => [
                 'type' => DiscountType::FixedAmount,
                 'amount' => 20,
-                'expected' => 20
+                'expected' => 20,
             ],
             'fixed amount that is greater than the provided total' => [
                 'type' => DiscountType::FixedAmount,
                 'amount' => 120,
-                'expected' => 100
+                'expected' => 100,
             ],
         ];
     }

@@ -9,7 +9,7 @@ trait HandlesLimitationToItems
     /**
      * select the applicable products
      *
-     * @var callable(Item $item): bool
+     * @var callable(Item): bool
      */
     protected $itemsSelector;
 
@@ -30,13 +30,13 @@ trait HandlesLimitationToItems
     }
 
     /**
-     * @param \MissionX\DiscountsEngine\Item[] $items
+     * @param  \MissionX\DiscountsEngine\Item[]  $items
      */
     public function applyTo(array $items): static
     {
         $this->items = $items;
 
-        $this->applicableItems = !isset($this->itemsSelector)
+        $this->applicableItems = ! isset($this->itemsSelector)
             ? $items
             : array_filter($items, $this->itemsSelector);
 
@@ -48,7 +48,7 @@ trait HandlesLimitationToItems
      */
     protected function getPurchaseAmount(): float
     {
-        return array_reduce($this->applicableItems, fn(float $total, Item $item) => $total + $item->total(), 0.0);
+        return array_reduce($this->applicableItems, fn (float $total, Item $item) => $total + $item->total(), 0.0);
     }
 
     /**
@@ -56,6 +56,6 @@ trait HandlesLimitationToItems
      */
     protected function getPurchaseQty(): int
     {
-        return array_reduce($this->applicableItems, fn(float $total, Item $item) => $total + $item->qty, 0);
+        return array_reduce($this->applicableItems, fn (float $total, Item $item) => $total + $item->qty, 0);
     }
 }

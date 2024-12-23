@@ -2,18 +2,17 @@
 
 namespace MissionX\DiscountsEngine\Tests;
 
-use Mockery;
-use Mockery\MockInterface;
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\Attributes\Test;
-use MissionX\DiscountsEngine\DiscountsEngine;
-use PHPUnit\Framework\Attributes\DataProvider;
-use MissionX\DiscountsEngine\Discounts\Discount;
-use MissionX\DiscountsEngine\Enums\DiscountPriority;
 use MissionX\DiscountsEngine\DataTransferObjects\Item;
 use MissionX\DiscountsEngine\Discounts\AmountOffOrderDiscount;
 use MissionX\DiscountsEngine\Discounts\AmountOffProductDiscount;
 use MissionX\DiscountsEngine\Discounts\BuyXGetAmountOffOfYDiscount;
+use MissionX\DiscountsEngine\DiscountsEngine;
+use MissionX\DiscountsEngine\Enums\DiscountPriority;
+use Mockery;
+use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 class DiscountsEngineTest extends TestCase
 {
@@ -35,9 +34,9 @@ class DiscountsEngineTest extends TestCase
     public function it_sorts_discounts_by_priority()
     {
         $this->engine()
-            ->addDiscount($orderOffDiscount = new AmountOffOrderDiscount())
-            ->addDiscount(($productOffDiscount = new AmountOffProductDiscount())->priority(DiscountPriority::High))
-            ->addDiscount(($buxXGetYDiscount = new BuyXGetAmountOffOfYDiscount())->priority(DiscountPriority::Low));
+            ->addDiscount($orderOffDiscount = new AmountOffOrderDiscount)
+            ->addDiscount(($productOffDiscount = new AmountOffProductDiscount)->priority(DiscountPriority::High))
+            ->addDiscount(($buxXGetYDiscount = new BuyXGetAmountOffOfYDiscount)->priority(DiscountPriority::Low));
 
         invade($this->engine())->sortDiscountsByPriority();
 
@@ -71,42 +70,42 @@ class DiscountsEngineTest extends TestCase
             'Only the highest priority discount will be applied because other discounts are not forced to combine' => [
                 'factory' => function () {
                     $discounts = [
-                        (new AmountOffProductDiscount())->priority(DiscountPriority::High),
-                        (new AmountOffOrderDiscount())->priority(DiscountPriority::High),
-                        (new BuyXGetAmountOffOfYDiscount())->priority(DiscountPriority::High),
+                        (new AmountOffProductDiscount)->priority(DiscountPriority::High),
+                        (new AmountOffOrderDiscount)->priority(DiscountPriority::High),
+                        (new BuyXGetAmountOffOfYDiscount)->priority(DiscountPriority::High),
                     ];
 
                     return [$discounts, [$discounts[0]]];
-                }
+                },
             ],
             'highest priority discount will be applied with the forced discount' => [
                 'factory' => function () {
                     $discounts = [
-                        (new AmountOffProductDiscount())->priority(DiscountPriority::High),
-                        (new AmountOffOrderDiscount()),
-                        (new BuyXGetAmountOffOfYDiscount())->forceCombineWithOtherDiscounts(),
+                        (new AmountOffProductDiscount)->priority(DiscountPriority::High),
+                        (new AmountOffOrderDiscount),
+                        (new BuyXGetAmountOffOfYDiscount)->forceCombineWithOtherDiscounts(),
                     ];
 
                     return [
                         $discounts,
-                        [$discounts[0], $discounts[2]]
+                        [$discounts[0], $discounts[2]],
                     ];
-                }
+                },
             ],
             'highest priority discount will be applied with the forced discount and the can be combined discount' => [
                 'factory' => function () {
                     $discounts = [
-                        (new AmountOffProductDiscount()),
-                        (new AmountOffOrderDiscount())->priority(DiscountPriority::High)->combineWithOtherDiscounts(),
-                        (new BuyXGetAmountOffOfYDiscount())->combineWithOtherDiscounts(),
-                        (new BuyXGetAmountOffOfYDiscount())->forceCombineWithOtherDiscounts(),
+                        (new AmountOffProductDiscount),
+                        (new AmountOffOrderDiscount)->priority(DiscountPriority::High)->combineWithOtherDiscounts(),
+                        (new BuyXGetAmountOffOfYDiscount)->combineWithOtherDiscounts(),
+                        (new BuyXGetAmountOffOfYDiscount)->forceCombineWithOtherDiscounts(),
                     ];
 
                     return [
                         $discounts,
-                        [$discounts[1], $discounts[2], $discounts[3]]
+                        [$discounts[1], $discounts[2], $discounts[3]],
                     ];
-                }
+                },
             ],
         ];
     }
@@ -117,19 +116,19 @@ class DiscountsEngineTest extends TestCase
         $twentyPercentOff = (new AmountOffOrderDiscount('twenty percent off'))
             ->forceCombineWithOtherDiscounts()
             ->amount(20)
-            ->limitToItems(fn(Item $item) => $item->type == 'product');
+            ->limitToItems(fn (Item $item) => $item->type == 'product');
 
         // this one won't be applied because it'll be applied after amount off product which will make the purchase amount less than 200
         $twentyPercentOffLimited = (new AmountOffOrderDiscount('twenty percent off, min purcahse amount > 200'))
             ->forceCombineWithOtherDiscounts()
             ->amount(20)
             ->minPurchaseAmount(200)
-            ->limitToItems(fn(Item $item) => $item->type == 'product');
+            ->limitToItems(fn (Item $item) => $item->type == 'product');
 
-        $amountOffProduct  = (new AmountOffProductDiscount('10 percent off of all products'))
+        $amountOffProduct = (new AmountOffProductDiscount('10 percent off of all products'))
             ->priority(DiscountPriority::High)
             ->amount(10)
-            ->limitToItems(fn(Item $item) => $item->type == 'product');
+            ->limitToItems(fn (Item $item) => $item->type == 'product');
 
         $engine = (new DiscountsEngine)
             ->addDiscount($twentyPercentOff)
@@ -145,7 +144,7 @@ class DiscountsEngineTest extends TestCase
     private function engine(): MockInterface|DiscountsEngine
     {
         return once(
-            fn() => Mockery::mock(DiscountsEngine::class, function (MockInterface $mock) {
+            fn () => Mockery::mock(DiscountsEngine::class, function (MockInterface $mock) {
                 $mock->makePartial();
                 $mock->shouldAllowMockingProtectedMethods();
             })
@@ -158,6 +157,7 @@ class DiscountsEngineTest extends TestCase
         foreach ($items as $item) {
             $map[$item->id] = $item;
         }
+
         return $map;
     }
 }

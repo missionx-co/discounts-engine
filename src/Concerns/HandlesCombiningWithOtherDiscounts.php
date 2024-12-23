@@ -2,9 +2,6 @@
 
 namespace MissionX\DiscountsEngine\Concerns;
 
-use Closure;
-use MissionX\DiscountsEngine\Errors;
-use MissionX\DiscountsEngine\Enums\DiscountType;
 use MissionX\DiscountsEngine\Enums\DiscountPriority;
 
 trait HandlesCombiningWithOtherDiscounts

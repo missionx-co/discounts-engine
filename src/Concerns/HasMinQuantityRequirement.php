@@ -4,7 +4,6 @@ namespace MissionX\DiscountsEngine\Concerns;
 
 use Closure;
 use MissionX\DiscountsEngine\Errors;
-use MissionX\DiscountsEngine\Enums\DiscountType;
 
 trait HasMinQuantityRequirement
 {
@@ -19,7 +18,7 @@ trait HasMinQuantityRequirement
 
     public function checkMinQuantityRequirement(Closure $fail)
     {
-        if (!$this->minQty) {
+        if (! $this->minQty) {
             return;
         }
 

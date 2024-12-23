@@ -14,6 +14,7 @@ trait HasAmount
     {
         $this->type = $type;
         $this->amount = $amount;
+
         return $this;
     }
 }

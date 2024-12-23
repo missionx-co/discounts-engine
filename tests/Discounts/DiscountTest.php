@@ -8,8 +8,8 @@ use MissionX\DiscountsEngine\Tests\HasTestItems;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 class DiscountTest extends TestCase
 {
@@ -33,20 +33,20 @@ class DiscountTest extends TestCase
     {
         return [
             'discount is not limited to any products' => [
-                'products' => fn(Item $item) => true,
+                'products' => fn (Item $item) => true,
                 'expectedAmount' => 205,
-                'expectedQty' => 4
+                'expectedQty' => 4,
             ],
             'discount is limited to products only' => [
-                'products' => fn(Item $item) => $item->type == 'product',
+                'products' => fn (Item $item) => $item->type == 'product',
                 'expectedAmount' => 200,
-                'expectedQty' => 3
+                'expectedQty' => 3,
             ],
             'discount is limited to specific product' => [
-                'products' => fn(Item $item) => $item->id == 1,
+                'products' => fn (Item $item) => $item->id == 1,
                 'expectedAmount' => 100,
-                'expectedQty' => 1
-            ]
+                'expectedQty' => 1,
+            ],
         ];
     }
 
@@ -55,7 +55,7 @@ class DiscountTest extends TestCase
     public function it_asserts_it_can_be_applied($canBeApplied, $minPurchaseAmount, $minQty)
     {
         $discount = $this->discount()
-            ->limitToItems(fn(Item $item) => $item->type == 'product')
+            ->limitToItems(fn (Item $item) => $item->type == 'product')
             ->minPurchaseAmount($minPurchaseAmount)
             ->minQty($minQty)
             ->applyTo($this->items());
@@ -67,7 +67,7 @@ class DiscountTest extends TestCase
 
         $discount->assertCanBeApplied($fail);
 
-        $this->assertEquals($canBeApplied, !$failed);
+        $this->assertEquals($canBeApplied, ! $failed);
     }
 
     public static function canBeAppliedDataProvider()
@@ -76,22 +76,22 @@ class DiscountTest extends TestCase
             'can not be applied because min purcahse is greater than purchase amount' => [
                 'canBeApplied' => false,
                 'minPurchaseAmount' => 205,
-                'minQty' => 0
+                'minQty' => 0,
             ],
             'can be applied because min purcahse is greater than purchase amount' => [
                 'canBeApplied' => true,
                 'minPurchaseAmount' => 200,
-                'minQty' => 0
+                'minQty' => 0,
             ],
             'can not be applied because min qty is greater than purchase qty' => [
                 'canBeApplied' => false,
                 'minPurchaseAmount' => 0,
-                'minQty' => 4
+                'minQty' => 4,
             ],
             'can be applied because min qty is greater than purchase qty' => [
                 'canBeApplied' => true,
                 'minPurchaseAmount' => 0,
-                'minQty' => 3
+                'minQty' => 3,
             ],
         ];
     }
@@ -102,6 +102,7 @@ class DiscountTest extends TestCase
             $discount = Mockery::mock(Discount::class);
             $discount->makePartial();
             $discount->shouldAllowMockingProtectedMethods();
+
             return $discount;
         });
     }

@@ -4,7 +4,6 @@ namespace MissionX\DiscountsEngine\Concerns;
 
 use Closure;
 use MissionX\DiscountsEngine\Errors;
-use MissionX\DiscountsEngine\Enums\DiscountType;
 
 trait HasMinPurchaseAmountRequirement
 {
@@ -19,7 +18,7 @@ trait HasMinPurchaseAmountRequirement
 
     public function checkMinPurchaseAmountRequirement(Closure $fail)
     {
-        if (!$this->minPurchaseAmount) {
+        if (! $this->minPurchaseAmount) {
             return;
         }
 

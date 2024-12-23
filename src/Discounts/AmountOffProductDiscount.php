@@ -3,9 +3,8 @@
 namespace MissionX\DiscountsEngine\Discounts;
 
 use MissionX\DiscountsEngine\Concerns\HasAmount;
-use MissionX\DiscountsEngine\DataTransferObjects\Item;
 use MissionX\DiscountsEngine\DataTransferObjects\DiscountResult;
-
+use MissionX\DiscountsEngine\DataTransferObjects\Item;
 
 class AmountOffProductDiscount extends Discount
 {
@@ -25,17 +24,18 @@ class AmountOffProductDiscount extends Discount
          */
         protected $affectedItemsSelector = null
     ) {
-        if (!$this->affectedItemsSelector) {
-            $this->affectedItemsSelector = fn(Item $item) => true;
+        if (! $this->affectedItemsSelector) {
+            $this->affectedItemsSelector = fn (Item $item) => true;
         }
     }
 
     /**
-     * @param callable(Item $items): bool $affectedItems only applicable items will be checked with this selector
+     * @param  callable(Item $items): bool  $affectedItems  only applicable items will be checked with this selector
      */
     public function selectAffectedItemsUsing(callable $affectedItems): static
     {
         $this->affectedItemsSelector = $affectedItems;
+
         return $this;
     }
 

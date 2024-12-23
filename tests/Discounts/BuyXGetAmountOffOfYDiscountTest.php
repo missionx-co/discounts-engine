@@ -2,13 +2,13 @@
 
 namespace MissionX\DiscountsEngine\Tests\Discounts;
 
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\Attributes\Test;
-use MissionX\DiscountsEngine\Tests\HasTestItems;
 use MissionX\DiscountsEngine\DataTransferObjects\Item;
 use MissionX\DiscountsEngine\DataTransferObjects\YItem;
 use MissionX\DiscountsEngine\Discounts\BuyXGetAmountOffOfYDiscount;
 use MissionX\DiscountsEngine\Enums\DiscountType;
+use MissionX\DiscountsEngine\Tests\HasTestItems;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 class BuyXGetAmountOffOfYDiscountTest extends TestCase
 {
@@ -17,11 +17,11 @@ class BuyXGetAmountOffOfYDiscountTest extends TestCase
     #[Test]
     public function it_hancles_buy_2_of_item_2_and_get_50_percent_of_off_item_1()
     {
-        $discount = (new BuyXGetAmountOffOfYDiscount())
+        $discount = (new BuyXGetAmountOffOfYDiscount)
             ->amount(50, DiscountType::Percentage)
-            ->limitToItems(fn(Item $item) => $item->type == 'product')
-            ->hasX(fn(Item $item) => $item->id == 2 & $item->qty == 2)
-            ->getY(fn(array $items) => [new YItem(1)])
+            ->limitToItems(fn (Item $item) => $item->type == 'product')
+            ->hasX(fn (Item $item) => $item->id == 2 & $item->qty == 2)
+            ->getY(fn (array $items) => [new YItem(1)])
             ->applyTo($this->items())
             ->calculate();
 
@@ -35,11 +35,11 @@ class BuyXGetAmountOffOfYDiscountTest extends TestCase
     #[Test]
     public function it_handles_free_shipping()
     {
-        $discount = (new BuyXGetAmountOffOfYDiscount())
+        $discount = (new BuyXGetAmountOffOfYDiscount)
             ->amount(100, DiscountType::Percentage)
-            ->limitToItems(fn(Item $item) => $item->type == 'product')
+            ->limitToItems(fn (Item $item) => $item->type == 'product')
             ->minPurchaseAmount(200)
-            ->getY(fn(array $items) => [new YItem(3)])
+            ->getY(fn (array $items) => [new YItem(3)])
             ->applyTo($this->items())
             ->calculate();
 
