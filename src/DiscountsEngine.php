@@ -52,7 +52,7 @@ class DiscountsEngine
 
     public function total(): float
     {
-        return array_reduce($this->items, fn(float $total, Item $item) => $total + $item->total(), 0);
+        return $this->totalBeforeDiscount() - $this->savings();
     }
 
     public function savings(): float

@@ -137,7 +137,9 @@ class DiscountsEngineTest extends TestCase
             ->addDiscount($amountOffProduct)
             ->process($this->items());
 
+        $this->assertEquals(205, $engine->totalBeforeDiscount());
         $this->assertEquals(56, $engine->savings());
+        $this->assertEquals(205 - 56, $engine->total());
     }
 
     private function engine(): MockInterface|DiscountsEngine
