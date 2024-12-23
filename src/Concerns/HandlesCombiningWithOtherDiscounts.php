@@ -5,6 +5,7 @@ namespace MissionX\DiscountsEngine\Concerns;
 use Closure;
 use MissionX\DiscountsEngine\Errors;
 use MissionX\DiscountsEngine\Enums\DiscountType;
+use MissionX\DiscountsEngine\Enums\DiscountPriority;
 
 trait HandlesCombiningWithOtherDiscounts
 {
@@ -15,7 +16,7 @@ trait HandlesCombiningWithOtherDiscounts
     /**
      * Higher value = higher priority
      */
-    public int $priority = 0;
+    public DiscountPriority $priority = DiscountPriority::Normal;
 
     public function combineWithOtherDiscounts(bool $canCombineWithOtherDiscounts = true): static
     {
@@ -31,7 +32,7 @@ trait HandlesCombiningWithOtherDiscounts
         return $this;
     }
 
-    public function priority(int $priority = 0): static
+    public function priority(DiscountPriority $priority): static
     {
         $this->priority = $priority;
 
