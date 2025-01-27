@@ -29,7 +29,7 @@ class BuyXGetAmountOffOfYDiscount extends Discount
     }
 
     /**
-     * @param  callable(Item $item): bool  $hasX  all provided items will be checked with this selector
+     * @param  callable(array $items): bool  $hasX  all provided items will be checked with this selector
      */
     public function hasX(callable $hasX): static
     {
@@ -56,7 +56,7 @@ class BuyXGetAmountOffOfYDiscount extends Discount
             return;
         }
 
-        $items = array_filter($this->applicableItems, $this->hasX);
+        $items = call_user_func($this->hasX, $this->applicableItems);
         if (! empty($items)) {
             return;
         }

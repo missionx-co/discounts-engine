@@ -116,19 +116,34 @@ class DiscountsEngineTest extends TestCase
         $twentyPercentOff = (new AmountOffOrderDiscount('twenty percent off'))
             ->forceCombineWithOtherDiscounts()
             ->amount(20)
-            ->limitToItems(fn(Item $item) => $item->type == 'product');
+            ->limitToItems(
+                fn(array $items) => array_filter(
+                    $items,
+                    fn(Item $item) => $item->type == 'product'
+                )
+            );
 
         // this one won't be applied because it'll be applied after amount off product which will make the purchase amount less than 200
         $twentyPercentOffLimited = (new AmountOffOrderDiscount('twenty percent off, min purcahse amount > 200'))
             ->forceCombineWithOtherDiscounts()
             ->amount(20)
             ->minPurchaseAmount(200)
-            ->limitToItems(fn(Item $item) => $item->type == 'product');
+            ->limitToItems(
+                fn(array $items) => array_filter(
+                    $items,
+                    fn(Item $item) => $item->type == 'product'
+                )
+            );
 
         $amountOffProduct = (new AmountOffProductDiscount('10 percent off of all products'))
             ->priority(DiscountPriority::High)
             ->amount(10)
-            ->limitToItems(fn(Item $item) => $item->type == 'product');
+            ->limitToItems(
+                fn(array $items) => array_filter(
+                    $items,
+                    fn(Item $item) => $item->type == 'product'
+                )
+            );
 
         $engine = (new DiscountsEngine)
             ->addDiscount($twentyPercentOff)

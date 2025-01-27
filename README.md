@@ -44,10 +44,16 @@ $items = [
 
 -   `limitToItems`:Use this to specify which items the discount applies to. It accepts a callable to filter items.
     Example: Apply the discount only to items with type = product. In this case, the purchase amount will be 200 and the quantity will be 3.
-    `php
-(new Discount)
-    ->limitToItems(fn (Item $item) => $item->type == 'product')
-`
+
+    ```php
+    (new Discount)
+    ->limitToItems(
+        fn (array $items) => array_filter(
+            $items,
+            fn (Item $item) => $item->type == 'product'
+        )
+    )
+    ```
 
 -   `priority`: When multiple discounts are processed, the engine will apply them in order of priority (highest to lowest).
 
@@ -98,7 +104,12 @@ use MissionX\DiscountsEngine\Enums\DiscountType;
 // the following configuration will be applied to all applicable items
 (new AmountOffProductDiscount)
     ->amount(10)
-    ->limitToItems(fn (Item $item) => $item->type == 'product')
+    ->limitToItems(
+        fn (array $items) => array_filter(
+            $items,
+            fn (Item $item) => $item->type == 'product'
+        )
+    )
 ```
 
 Example 2: Apply a $10 fixed discount to a specific item (e.g., item with id = 2) only if the purchase amount exceeds $200.
@@ -107,9 +118,19 @@ Example 2: Apply a $10 fixed discount to a specific item (e.g., item with id = 2
 // the following configuration will be applied to item with id=2 only
 (new AmountOffProductDiscount)
     ->amount(10, DiscountType::FixedAmount)
-    ->limitToItems(fn (Item $item) => $item->type == 'product')
+    ->limitToItems(
+        fn (array $items) => array_filter(
+            $items,
+            fn (Item $item) => $item->type == 'product'
+        )
+    )
     ->minPurchaseAmount(200)
-    ->selectAffectedItemsUsing(fn (Item) => $item->id == 2)
+    ->selectAffectedItemsUsing(
+        fn (array $items) => array_filter(
+            $items,
+            fn (Item $item) => $item->id == 2
+        )
+    )
 ```
 
 The result of the discount is 10
@@ -132,7 +153,12 @@ Apply a discount to the total purchase amount, considering any item limitations 
 (new AmountOffOrderDiscount)
     ->amount(5)
     ->minPurchaseAmount(200)
-    ->limitToItems(fn (Item $item) => $item->type == 'product')
+    ->limitToItems(
+        fn (array $items) => array_filter(
+            $items,
+            fn (Item $item) => $item->type == 'product'
+        )
+    )
 ```
 
 In this example, the limitToItems method restricts the calculation to items of type product. As a result, the total purchase amount is 200, and the discount is 10 (5% of 200).
@@ -144,8 +170,18 @@ This discount type applies a specified discount to certain items (`Y`) if the us
 ```php
 (new BuyXGetAmountOffOfYDiscount())
     ->amount(50, DiscountType::Percentage)
-    ->limitToItems(fn(Item $item) => $item->type == 'product')
-    ->hasX(fn(Item $item) => $item->id == 2 && $item->qty == 2)
+    ->limitToItems(
+        fn (array $items) => array_filter(
+            $items,
+            fn (Item $item) => $item->type == 'product'
+        )
+    )
+    ->hasX(
+        fn (array $items) => array_filter(
+            $items,
+            fn(Item $item) => $item->id == 2 && $item->qty == 2
+        )
+    )
     ->getY(fn(array $items) => [new YItem(itemId: 1, qty: 1)])
 ```
 
@@ -160,7 +196,12 @@ You can also simulate free shipping with this discount by applying a 100% discou
 ```php
 (new BuyXGetAmountOffOfYDiscount())
     ->amount(100, DiscountType::Percentage)
-    ->limitToItems(fn(Item $item) => $item->type == 'product')
+    ->limitToItems(
+        fn (array $items) => array_filter(
+            $items,
+            fn (Item $item) => $item->type == 'product'
+        )
+    )
     ->minPurchaseAmount(200)
     ->getY(fn(array $items) => [new YItem(3)])
 ```
@@ -177,7 +218,12 @@ The final component to work with is the `DiscountsEngine`, which processes and a
 $twentyPercentOff = (new AmountOffOrderDiscount('twenty percent off'))
     ->forceCombineWithOtherDiscounts()
     ->amount(20)
-    ->limitToItems(fn(Item $item) => $item->type == 'product');
+    ->limitToItems(
+        fn (array $items) => array_filter(
+            $items,
+            fn (Item $item) => $item->type == 'product'
+        )
+    );
 
 // This discount won't be applied because it will be evaluated after the "amount off product" discount,
 // which reduces the purchase amount below 200.
@@ -185,12 +231,22 @@ $twentyPercentOffLimited = (new AmountOffOrderDiscount('twenty percent off, min 
     ->forceCombineWithOtherDiscounts()
     ->amount(30)
     ->minPurchaseAmount(200)
-    ->limitToItems(fn(Item $item) => $item->type == 'product');
+    ->limitToItems(
+        fn (array $items) => array_filter(
+            $items,
+            fn (Item $item) => $item->type == 'product'
+        )
+    );
 
 $amountOffProduct  = (new AmountOffProductDiscount('10 percent off of all products'))
     ->priority(DiscountPriority::High)
     ->amount(10)
-    ->limitToItems(fn(Item $item) => $item->type == 'product');
+    ->limitToItems(
+        fn (array $items) => array_filter(
+            $items,
+            fn (Item $item) => $item->type == 'product'
+        )
+    );
 
 $engine = (new DiscountsEngine)
     ->addDiscount($twentyPercentOff)

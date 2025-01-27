@@ -18,7 +18,12 @@ class AmountOffProductDiscountTest extends TestCase
     {
         $discountResult = (new AmountOffProductDiscount)
             ->amount(20)
-            ->limitToItems(fn (Item $item) => $item->type == 'product')
+            ->limitToItems(
+                fn(array $items) => array_filter(
+                    $items,
+                    fn(Item $item) => $item->type == 'product'
+                )
+            )
             ->minPurchaseAmount(200)
             ->applyTo($this->items())
             ->calculate();
@@ -36,8 +41,18 @@ class AmountOffProductDiscountTest extends TestCase
     {
         $discountResult = (new AmountOffProductDiscount)
             ->amount(20, DiscountType::FixedAmount)
-            ->limitToItems(fn (Item $item) => $item->type == 'product')
-            ->selectAffectedItemsUsing(fn (Item $item) => $item->id == 2)
+            ->limitToItems(
+                fn(array $items) => array_filter(
+                    $items,
+                    fn(Item $item) => $item->type == 'product'
+                )
+            )
+            ->selectAffectedItemsUsing(
+                fn(array $items) => array_filter(
+                    $items,
+                    fn(Item $item) => $item->id == 2
+                )
+            )
             ->minPurchaseAmount(200)
             ->applyTo($this->items())
             ->calculate();

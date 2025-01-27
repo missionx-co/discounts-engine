@@ -20,17 +20,17 @@ class AmountOffProductDiscount extends Discount
          *
          * only applicable items will be checked with this selector
          *
-         * @var callable(Item $items): bool
+         * @var callable(array $items): array
          */
         protected $affectedItemsSelector = null
     ) {
         if (! $this->affectedItemsSelector) {
-            $this->affectedItemsSelector = fn (Item $item) => true;
+            $this->affectedItemsSelector = fn(array $items) => $items;
         }
     }
 
     /**
-     * @param  callable(Item $items): bool  $affectedItems  only applicable items will be checked with this selector
+     * @param  callable(array $items): array  $affectedItems  only applicable items will be checked with this selector
      */
     public function selectAffectedItemsUsing(callable $affectedItems): static
     {
@@ -42,7 +42,7 @@ class AmountOffProductDiscount extends Discount
     public function calculateDiscount(): DiscountResult
     {
         $applyToItems = isset($this->affectedItemsSelector)
-            ? array_filter($this->applicableItems, $this->affectedItemsSelector)
+            ? call_user_func($this->affectedItemsSelector, $this->applicableItems)
             : $this->applicableItems;
 
         $totalSavings = 0;

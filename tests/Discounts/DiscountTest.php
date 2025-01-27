@@ -33,17 +33,23 @@ class DiscountTest extends TestCase
     {
         return [
             'discount is not limited to any products' => [
-                'products' => fn (Item $item) => true,
+                'products' => fn(array $items) => $items,
                 'expectedAmount' => 205,
                 'expectedQty' => 4,
             ],
             'discount is limited to products only' => [
-                'products' => fn (Item $item) => $item->type == 'product',
+                'products' => fn(array $items) => array_filter(
+                    $items,
+                    fn(Item $item) => $item->type == 'product'
+                ),
                 'expectedAmount' => 200,
                 'expectedQty' => 3,
             ],
             'discount is limited to specific product' => [
-                'products' => fn (Item $item) => $item->id == 1,
+                'products' => fn(array $items) => array_filter(
+                    $items,
+                    fn(Item $item) => $item->id == 1
+                ),
                 'expectedAmount' => 100,
                 'expectedQty' => 1,
             ],
@@ -55,7 +61,10 @@ class DiscountTest extends TestCase
     public function it_asserts_it_can_be_applied($canBeApplied, $minPurchaseAmount, $minQty)
     {
         $discount = $this->discount()
-            ->limitToItems(fn (Item $item) => $item->type == 'product')
+            ->limitToItems(fn(array $items) => array_filter(
+                $items,
+                fn(Item $item) => $item->type == 'product'
+            ))
             ->minPurchaseAmount($minPurchaseAmount)
             ->minQty($minQty)
             ->applyTo($this->items());
