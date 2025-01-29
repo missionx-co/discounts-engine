@@ -24,7 +24,7 @@ class DiscountsEngine
      *
      * @var \MissionX\DiscountsEngine\Discount[]
      */
-    public array $appliedDiscounts = [];
+    public array $processedDiscounts = [];
 
     public function addDiscount(Discount $discount): static
     {
@@ -40,11 +40,11 @@ class DiscountsEngine
     {
         $this->setItems($items);
         $discounts = $this->determineDiscountsThatShouldBeApplied();
-        $this->appliedDiscounts = [];
+        $this->processedDiscounts = [];
 
         foreach ($discounts as $discount) {
             $result = $discount->applyTo($this->items)->calculate();
-            $this->appliedDiscounts[] = $result;
+            $this->processedDiscounts[] = $result;
 
             // we need each discount to have it's information for the savings that that was done
             $this->items = $this->clone($result->discount->getItems());
@@ -60,7 +60,7 @@ class DiscountsEngine
 
     public function savings(): float
     {
-        return array_reduce($this->appliedDiscounts, fn(float $total, DiscountResult $result) => $total + $result->savings, 0);
+        return array_reduce($this->processedDiscounts, fn(float $total, DiscountResult $result) => $total + $result->savings, 0);
     }
 
     public function totalBeforeDiscount(): float
@@ -70,7 +70,7 @@ class DiscountsEngine
 
     public function details()
     {
-        return $this->appliedDiscounts;
+        return $this->processedDiscounts;
     }
 
     /**
@@ -82,6 +82,28 @@ class DiscountsEngine
         $this->items = $this->clone($items);
 
         return $this;
+    }
+
+    public function hasAnyProcessedDiscountsApplied(): bool
+    {
+        foreach ($this->processedDiscounts as $discount) {
+            if ($discount->wasApplied()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasAllProcessedDiscountsApplied(): bool
+    {
+        foreach ($this->processedDiscounts as $discount) {
+            if (!$discount->wasApplied()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected function sortDiscountsByPriority()
