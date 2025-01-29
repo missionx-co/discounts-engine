@@ -177,12 +177,12 @@ This discount type applies a specified discount to certain items (`Y`) if the us
         )
     )
     ->hasX(
-        fn (array $items) => array_filter(
-            $items,
+        fn (array $applicableItems) => array_filter(
+            $applicableItems,
             fn(Item $item) => $item->id == 2 && $item->qty == 2
         )
     )
-    ->getY(fn(array $items) => [new YItem(itemId: 1, qty: 1)])
+    ->getY(fn(array $applicableItems, array $items, Discount $discount) => [new YItem(itemId: 1, qty: 1)])
 ```
 
 In this example:
@@ -203,7 +203,7 @@ You can also simulate free shipping with this discount by applying a 100% discou
         )
     )
     ->minPurchaseAmount(200)
-    ->getY(fn(array $items) => [new YItem(3)])
+    ->getY(fn(array $applicableItems, array $items, Discount $discount) => [new YItem(3)])
 ```
 
 #### 2.3 Custom Discounts

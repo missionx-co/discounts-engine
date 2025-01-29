@@ -18,7 +18,9 @@ class BuyXGetAmountOffOfYDiscount extends Discount
     /**
      * return the items that should be provided for free
      *
-     * @var callable(Item[], Discount): YItem[]
+     * callable(applicableItems Item[], allItems Item[], Discount): YItem[]
+     *
+     * @var callable(Item[], Item[], Discount): YItem[]
      */
     protected $getY;
 
@@ -39,7 +41,7 @@ class BuyXGetAmountOffOfYDiscount extends Discount
     }
 
     /**
-     * @param  callable(Item[] $items, Discount $discount): YItem[]  $getY
+     * @param  callable(Item[] $applicableItems, Item[] $allItems, Discount $discount): YItem[]  $getY
      */
     public function getY(callable $getY): static
     {
@@ -66,7 +68,7 @@ class BuyXGetAmountOffOfYDiscount extends Discount
 
     public function calculateDiscount(): DiscountResult
     {
-        $yItems = call_user_func($this->getY, $this->items, $this);
+        $yItems = call_user_func($this->getY, $this->applicableItems, $this->items, $this);
 
         $totalSavings = 0;
         foreach ($yItems as $yItem) {
