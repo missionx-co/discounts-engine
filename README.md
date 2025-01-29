@@ -188,7 +188,7 @@ This discount type applies a specified discount to certain items (`Y`) if the us
 In this example:
 
 1. If the cart contains 2 units of the item with id=2, the user qualifies for the discount.
-2. The discount is 50% off on 1 unit of the item with id=1.
+2. The discount is 50% off on 1 unit of the item with id=1. In case item id=1 has more than 1 item, the savings will be applied only to 1 unit
 3. The `limitToItems` ensures that only items of type product are considered for eligibility and discount application.
 
 You can also simulate free shipping with this discount by applying a 100% discount to the shipping item.

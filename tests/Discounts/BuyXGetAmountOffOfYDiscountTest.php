@@ -18,7 +18,7 @@ class BuyXGetAmountOffOfYDiscountTest extends TestCase
     public function it_hancles_buy_2_of_item_2_and_get_50_percent_of_off_item_1()
     {
         $discount = (new BuyXGetAmountOffOfYDiscount)
-            ->amount(50, DiscountType::Percentage)
+            ->amount(10, DiscountType::Percentage)
             ->limitToItems(
                 fn(array $items) => array_filter(
                     $items,
@@ -28,17 +28,17 @@ class BuyXGetAmountOffOfYDiscountTest extends TestCase
             ->hasX(
                 fn(array $items) => array_filter(
                     $items,
-                    fn(Item $item) => $item->id == 2 & $item->qty == 2
+                    fn(Item $item) => $item->id == 2 & $item->qty >= 2
                 )
             )
-            ->getY(fn(array $items) => [new YItem(1)])
+            ->getY(fn(array $items) => [new YItem(2, qty: 2)])
             ->applyTo($this->items())
             ->calculate();
 
-        $this->assertEquals(50, $discount->savings);
+        $this->assertEquals(10, $discount->savings);
         $this->assertTrue($discount->wasApplied());
         foreach ($this->items() as $item) {
-            $this->assertEquals($item->id == 1 ? 50 : 0, $item->discount);
+            $this->assertEquals($item->id == 2 ? 10 : 0, $item->discount);
         }
     }
 

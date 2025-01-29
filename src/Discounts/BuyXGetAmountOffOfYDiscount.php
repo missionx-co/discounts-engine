@@ -72,7 +72,7 @@ class BuyXGetAmountOffOfYDiscount extends Discount
         foreach ($yItems as $yItem) {
             $item = $this->findById($yItem->itemId);
             $unitPriceWithRespectToDiscount = $item->total() / $item->qty;
-            $savings = $this->type->calculateDiscountAmount($unitPriceWithRespectToDiscount, $this->amount);
+            $savings = $this->type->calculateDiscountAmount($unitPriceWithRespectToDiscount, $this->amount) * $yItem->qty;
             $item->discount += $savings;
             $totalSavings += $savings;
         }
