@@ -1,6 +1,6 @@
 {
     "name": "missionx-co/discounts-engine",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "description": "Flexible and developer-friendly solution for creating, managing, and validating discount rules in PHP application",
     "keywords": [
         "missionx-co",

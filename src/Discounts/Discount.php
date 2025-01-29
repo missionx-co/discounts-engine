@@ -82,4 +82,10 @@ abstract class Discount
     {
         return $this->applyTo($items)->calculate();
     }
+
+    public function setMetadata(string $key, $value): static
+    {
+        $this->metadata[$key] = $value;
+        return $this;
+    }
 }
