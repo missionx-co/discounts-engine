@@ -151,6 +151,8 @@ class DiscountsEngineTest extends TestCase
             ->addDiscount($amountOffProduct)
             ->process($this->items());
 
+        $this->assertFalse($engine->hasAllProcessedDiscountsApplied());
+        $this->assertTrue($engine->hasAnyProcessedDiscountsApplied());
         $this->assertEquals(205, $engine->totalBeforeDiscount());
         $this->assertEquals(56, $engine->savings());
         $this->assertEquals(149, $engine->total());

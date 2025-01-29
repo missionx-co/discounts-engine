@@ -17,7 +17,10 @@ abstract class Discount
         HasMinPurchaseAmountRequirement,
         HasMinQuantityRequirement;
 
-    public function __construct(public ?string $name = null) {}
+    public function __construct(
+        public ?string $name = null,
+        public array $metadata = []
+    ) {}
 
     /*-----------------------------------------------------
     * Methods
