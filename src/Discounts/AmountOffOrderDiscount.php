@@ -14,8 +14,7 @@ class AmountOffOrderDiscount extends Discount
         $orderTotal = $this->getPurchaseAmount();
 
         return new DiscountResult(
-            name: $this->name(),
-            items: $this->applicableItems,
+            discount: $this,
             savings: $this->type->calculateDiscountAmount($orderTotal, $this->amount),
         );
     }

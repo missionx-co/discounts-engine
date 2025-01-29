@@ -55,8 +55,7 @@ class AmountOffProductDiscount extends Discount
         }
 
         return new DiscountResult(
-            name: $this->name(),
-            items: $this->applicableItems,
+            discount: $this,
             savings: $totalSavings,
         );
     }

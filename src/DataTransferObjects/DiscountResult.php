@@ -2,18 +2,12 @@
 
 namespace MissionX\DiscountsEngine\DataTransferObjects;
 
+use MissionX\DiscountsEngine\Discounts\Discount;
+
 class DiscountResult
 {
     public function __construct(
-        /**
-         * Discount name
-         */
-        public string $name,
-
-        /**
-         * Items after discount
-         */
-        public array $items,
+        public Discount $discount,
 
         /**
          * amount saved by the discount

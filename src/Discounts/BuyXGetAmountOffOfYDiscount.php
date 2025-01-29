@@ -80,8 +80,7 @@ class BuyXGetAmountOffOfYDiscount extends Discount
         }
 
         return new DiscountResult(
-            name: $this->name(),
-            items: $this->items,
+            discount: $this,
             savings: $totalSavings,
         );
     }

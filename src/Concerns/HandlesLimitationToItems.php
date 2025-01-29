@@ -58,4 +58,14 @@ trait HandlesLimitationToItems
     {
         return array_reduce($this->applicableItems, fn(float $total, Item $item) => $total + $item->qty, 0);
     }
+
+    public function getItems(): array
+    {
+        return $this->items;
+    }
+
+    public function getApplicableItems(): array
+    {
+        return $this->items;
+    }
 }

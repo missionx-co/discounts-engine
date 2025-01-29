@@ -55,17 +55,13 @@ abstract class Discount
 
         if ($failed) {
             return new DiscountResult(
-                name: $this->name(),
-                items: $this->items,
+                discount: $this,
                 savings: 0,
                 error: $errorMessage
             );
         }
 
         $result = $this->calculateDiscount();
-
-        // make sure to keep the original full list
-        $result->items = $this->items;
 
         return $result;
     }

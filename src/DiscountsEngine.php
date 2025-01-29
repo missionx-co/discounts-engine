@@ -47,7 +47,7 @@ class DiscountsEngine
             $this->appliedDiscounts[] = $result;
 
             // we need each discount to have it's information for the savings that that was done
-            $this->items = $this->clone($result->items);
+            $this->items = $this->clone($result->discount->getItems());
         }
 
         return $this;
