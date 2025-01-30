@@ -17,10 +17,17 @@ abstract class Discount
         HasMinPurchaseAmountRequirement,
         HasMinQuantityRequirement;
 
+    private int $id;
+
+    public bool $isAutomatic = false;
+
+    public array $metadata = [];
+
     public function __construct(
         public ?string $name = null,
-        public array $metadata = []
-    ) {}
+    ) {
+        $this->id = mt_rand(100000, 999999);
+    }
 
     /*-----------------------------------------------------
     * Methods
@@ -69,6 +76,18 @@ abstract class Discount
         return $result;
     }
 
+    public function setMetadata(string $key, $value): static
+    {
+        $this->metadata[$key] = $value;
+        return $this;
+    }
+
+    public function setIsAutomatic(bool $isAutomatic = true): static
+    {
+        $this->isAutomatic = $isAutomatic;
+        return $this;
+    }
+
     public function name(): string
     {
         if ($this->name) {
@@ -78,14 +97,8 @@ abstract class Discount
         return static::class;
     }
 
-    public function __invoke(array $items): DiscountResult
+    public function id()
     {
-        return $this->applyTo($items)->calculate();
-    }
-
-    public function setMetadata(string $key, $value): static
-    {
-        $this->metadata[$key] = $value;
-        return $this;
+        return $this->id;
     }
 }

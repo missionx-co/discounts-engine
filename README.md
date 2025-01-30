@@ -88,6 +88,12 @@ $items = [
     (new Discount)->forceCombineWithOtherDiscounts()
     ```
 
+-   `isAutomatic`:
+
+    ```php
+    (new Discount)->setIsAutomatic()
+    ```
+
 #### 2.2 Available Discount Types
 
 The `Discount` class is abstract, so you cannot instantiate it directly. This package provides three types of discount objects to handle most use cases.
@@ -215,55 +221,47 @@ You can create your own discount just by extending the `Discount` abstract class
 The final component to work with is the `DiscountsEngine`, which processes and applies discounts to items.
 
 ```php
-$twentyPercentOff = (new AmountOffOrderDiscount('twenty percent off'))
-    ->forceCombineWithOtherDiscounts()
-    ->amount(20)
-    ->limitToItems(
-        fn (array $items) => array_filter(
-            $items,
-            fn (Item $item) => $item->type == 'product'
-        )
-    );
+$discount = (new AmountOffOrderDiscount())->amount(20);
+$discount2 = (new AmountOffOrderDiscount())->amount(10)->forceCombineWithOtherDiscounts();
+$discount3 = (new AmountOffOrderDiscount())->amount(30)->combineWithOtherDiscounts();
+// won't be applied because min purcahse amount is greater than the total amount
+$discount4 = (new AmountOffOrderDiscount())->amount(20)->forceCombineWithOtherDiscounts()->minPurchaseAmount(300);
 
-// This discount won't be applied because it will be evaluated after the "amount off product" discount,
-// which reduces the purchase amount below 200.
-$twentyPercentOffLimited = (new AmountOffOrderDiscount('twenty percent off, min purchase amount > 200'))
-    ->forceCombineWithOtherDiscounts()
-    ->amount(30)
-    ->minPurchaseAmount(200)
-    ->limitToItems(
-        fn (array $items) => array_filter(
-            $items,
-            fn (Item $item) => $item->type == 'product'
-        )
-    );
-
-$amountOffProduct  = (new AmountOffProductDiscount('10 percent off of all products'))
-    ->priority(DiscountPriority::High)
-    ->amount(10)
-    ->limitToItems(
-        fn (array $items) => array_filter(
-            $items,
-            fn (Item $item) => $item->type == 'product'
-        )
-    );
-
-$engine = (new DiscountsEngine)
+$group = (new DiscountsEngine)
     ->addDiscount($twentyPercentOff)
     ->addDiscount($twentyPercentOffLimited)
     ->addDiscount($amountOffProduct)
     ->process($this->items());
 
-$engine->totalBeforeDiscount(); // 205
-$engine->savings(); // 56 (10% off all products from AmountOffProduct, followed by 20% off the remaining total)
-$engine->total(); // 149
-$engine->appliedDiscounts; // List of the applied discounts
+$group->savings(); // 82 (10% + 30%)
 ```
 
-**How does the Discount Engine apply discounts?**
+#### How the Discount Engine Applies Discounts
 
-1. The discount engine sorts discounts by priority (highest to lowest).
-2. If the highest-priority discount can be combined with other discounts, all combinable discounts are applied.
-3. If the highest-priority discount cannot be combined, only that discount and any discounts explicitly forced to combine will be applied.
+1. **Step 1: Grouping Discounts**  
+   The discount engine processes discounts (that are not forced to combine) one by one and combines them with other discounts:
 
-This systematic approach ensures flexibility while maintaining order in how discounts are processed and applied.
+    - If a discount is **combinable**, it will be combined with:
+        - All other combinable discounts.
+        - Discounts that are **forced to combine**.
+    - If a discount is **not combinable**, it will only be combined with discounts that are **forced to combine**.
+
+    **Example**:  
+    Discounts in the above example will be grouped into two groups:
+
+    - **Group 1**: Discount 1, Discount 2, and Discount 4.
+    - **Group 2**: Discount 2, Discount 3, and Discount 4.
+
+2. **Step 2: Sorting Discounts in Each Group**
+
+    - Discounts in each group are split into two categories:
+        1. **Automatic discounts**.
+        2. **Non-automatic discounts**.
+    - Each category is sorted by **priority** (from high to low).
+    - The categories are then combined, with **automatic discounts placed first**.
+
+3. **Step 3: Processing Items Across Groups**  
+   The discount engine processes items across all groups.
+
+4. **Step 4: Selecting the Best Group**  
+   The group with the **highest savings** is selected.

@@ -2,29 +2,23 @@
 
 namespace MissionX\DiscountsEngine;
 
-use MissionX\DiscountsEngine\DataTransferObjects\DiscountResult;
-use MissionX\DiscountsEngine\DataTransferObjects\Item;
 use MissionX\DiscountsEngine\Discounts\Discount;
+use MissionX\DiscountsEngine\DataTransferObjects\Item;
+use MissionX\DiscountsEngine\DataTransferObjects\DiscountResult;
+use MissionX\DiscountsEngine\Exceptions\DiscountsGroupNotElectedException;
 
 class DiscountsEngine
 {
     public array $items = [];
 
-    public array $originalItems = [];
-
     /**
      * The Discounts that will be applied to items
      *
-     * @var \MissionX\DiscountsEngine\Discount[]
+     * @var \MissionX\DiscountsEngine\Discounts\Discount[]
      */
     public array $discounts = [];
 
-    /**
-     * Discounts that were applied to items
-     *
-     * @var \MissionX\DiscountsEngine\Discount[]
-     */
-    public array $processedDiscounts = [];
+    protected array $groups;
 
     public function addDiscount(Discount $discount): static
     {
@@ -34,114 +28,79 @@ class DiscountsEngine
     }
 
     /**
-     * @param  Item[]  $items
+     * Process Items and return the discount group that was elected to be applied
      */
-    public function process(array $items): static
+    public function process(array $items): DiscountsGroup
     {
-        $this->setItems($items);
-        $discounts = $this->determineDiscountsThatShouldBeApplied();
-        $this->processedDiscounts = [];
-
-        foreach ($discounts as $discount) {
-            $result = $discount->applyTo($this->items)->calculate();
-            $this->processedDiscounts[] = $result;
-
-            // we need each discount to have it's information for the savings that that was done
-            $this->items = $this->clone($result->discount->getItems());
+        $groups = $this->getDiscountsGroups();
+        if (empty($groups)) {
+            throw new DiscountsGroupNotElectedException("Discounts not found");
         }
 
-        return $this;
-    }
+        // find savings for all groups
+        $savings = array_reduce(
+            $groups,
+            function (array $acc, DiscountsGroup $discountsGroup) use ($items) {
+                $acc[$discountsGroup->id()] = $discountsGroup->process($items);
+                return $acc;
+            },
+            []
+        );
 
-    public function total(): float
-    {
-        return $this->totalBeforeDiscount() - $this->savings();
-    }
-
-    public function savings(): float
-    {
-        return array_reduce($this->processedDiscounts, fn(float $total, DiscountResult $result) => $total + $result->savings, 0);
-    }
-
-    public function totalBeforeDiscount(): float
-    {
-        return array_reduce($this->originalItems, fn(float $total, Item $item) => $total + $item->total(), 0);
-    }
-
-    public function details()
-    {
-        return $this->processedDiscounts;
-    }
-
-    /**
-     * @param  Item[]  $items
-     */
-    public function setItems(array $items): static
-    {
-        $this->originalItems = $items;
-        $this->items = $this->clone($items);
-
-        return $this;
-    }
-
-    public function hasAnyProcessedDiscountsApplied(): bool
-    {
-        foreach ($this->processedDiscounts as $discount) {
-            if ($discount->wasApplied()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public function hasAllProcessedDiscountsApplied(): bool
-    {
-        foreach ($this->processedDiscounts as $discount) {
-            if (!$discount->wasApplied()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    protected function sortDiscountsByPriority()
-    {
-        usort($this->discounts, function (Discount $a, Discount $b) {
-            if ($a->priority == $b->priority) {
+        // sort $savings desc
+        uasort($savings, function ($a, $b) {
+            if ($a == $b) {
                 return 0;
             }
 
-            return $a->priority->value > $b->priority->value ? -1 : 1;
+            return $a > $b ? -1 : 1;
         });
+
+        return $groups[array_key_first($savings)];
     }
 
-    protected function determineDiscountsThatShouldBeApplied(): array
+    protected function groupDiscounts()
     {
-        if (count($this->discounts) <= 1) {
-            return $this->discounts;
+        if (count($this->discounts) == 0) {
+            return [];
         }
 
-        $this->sortDiscountsByPriority();
-        /** @var Discount */
-        $highestPriorityDiscount = $this->discounts[0];
-        if (! $highestPriorityDiscount->canCombineWithOtherDiscounts && ! $highestPriorityDiscount->forceCombineWithOtherDiscounts) {
-            // get the highest priority discount and other discounts that we're forced to combine with the others
-            return array_filter($this->discounts, fn(Discount $discount) => $discount == $highestPriorityDiscount || $discount->forceCombineWithOtherDiscounts);
+        if (count($this->discounts) == 1) {
+            $group = new DiscountsGroup($this->discounts);
+            $this->groups = [$group->id() => $group];
+            return;
         }
 
-        // get all discounts that can be combined and the we're foced to combine
-        return array_filter($this->discounts, fn(Discount $discount) => $discount->canCombineWithOtherDiscounts || $discount->forceCombineWithOtherDiscounts);
+        $this->groups = [];
+        foreach ($this->discounts as $discount) {
+            if ($discount->forceCombineWithOtherDiscounts) {
+                continue;
+            }
+
+            $group = new DiscountsGroup($this->getDiscountsThatCanBeCombinedWithDiscount($discount));
+            if (isset($this->groups[$group->id()])) {
+                continue;
+            }
+
+            $this->groups[$group->id()] = $group;
+        }
     }
 
-    protected function clone(array $items): array
+    protected function getDiscountsThatCanBeCombinedWithDiscount(Discount $discount): array
     {
-        $clone = [];
-        foreach ($items as $key => $item) {
-            $clone[$key] = clone $item;
+        if (!$discount->canCombineWithOtherDiscounts) {
+            return array_filter($this->discounts, fn(Discount $item) => $item == $discount || $item->forceCombineWithOtherDiscounts);
         }
 
-        return $clone;
+        return array_filter($this->discounts, fn(Discount $item) => $item == $discount || $item->forceCombineWithOtherDiscounts || $item->canCombineWithOtherDiscounts);
+    }
+
+    public function getDiscountsGroups(): array
+    {
+        if (!isset($this->groups)) {
+            $this->groupDiscounts();
+        }
+
+        return $this->groups;
     }
 }

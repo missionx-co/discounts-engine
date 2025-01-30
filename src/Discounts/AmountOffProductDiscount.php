@@ -24,6 +24,8 @@ class AmountOffProductDiscount extends Discount
          */
         protected $affectedItemsSelector = null
     ) {
+        parent::__construct($name);
+
         if (! $this->affectedItemsSelector) {
             $this->affectedItemsSelector = fn(array $items) => $items;
         }

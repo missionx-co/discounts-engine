@@ -7,6 +7,7 @@ use MissionX\DiscountsEngine\Discounts\AmountOffOrderDiscount;
 use MissionX\DiscountsEngine\Discounts\AmountOffProductDiscount;
 use MissionX\DiscountsEngine\Discounts\BuyXGetAmountOffOfYDiscount;
 use MissionX\DiscountsEngine\DiscountsEngine;
+use MissionX\DiscountsEngine\DiscountsGroup;
 use MissionX\DiscountsEngine\Enums\DiscountPriority;
 use Mockery;
 use Mockery\MockInterface;
@@ -19,143 +20,73 @@ class DiscountsEngineTest extends TestCase
     use HasTestItems;
 
     #[Test]
-    public function it_clones_items()
+    public function it_finds_discounts_that_can_combine_with_a_discount()
     {
-        $this->engine()->setItems($this->items());
-        $originalItemsById = $this->keyById($this->engine()->originalItems);
-        $itemsById = $this->keyById($this->engine()->items);
-        foreach ($this->items() as $item) {
-            $this->assertSame($item, $originalItemsById[$item->id]);
-            $this->assertNotSame($item, $itemsById[$item->id]);
-        }
+        $discount = new AmountOffOrderDiscount();
+        $discount2 = (new AmountOffOrderDiscount())->forceCombineWithOtherDiscounts();
+        $discount3 = (new AmountOffOrderDiscount())->combineWithOtherDiscounts();
+
+        $this->engine()->addDiscount($discount)
+            ->addDiscount($discount2)
+            ->addDiscount($discount3);
+
+        $discounts = invade($this->engine())->getDiscountsThatCanBeCombinedWithDiscount($discount);
+        $this->assertCount(2, $discounts);
+        $this->assertContains($discount, $discounts);
+        $this->assertContains($discount2, $discounts);
+
+        $discounts = invade($this->engine())->getDiscountsThatCanBeCombinedWithDiscount($discount3);
+        $this->assertCount(2, $discounts);
+        $this->assertContains($discount3, $discounts);
+        $this->assertContains($discount2, $discounts);
+
+        $discounts = invade($this->engine())->getDiscountsThatCanBeCombinedWithDiscount($discount2);
+        $this->assertCount(1, $discounts);
+        $this->assertContains($discount2, $discounts);
     }
 
     #[Test]
-    public function it_sorts_discounts_by_priority()
+    public function it_groups_discounts()
     {
+        $discount = new AmountOffOrderDiscount();
+        $discount2 = (new AmountOffOrderDiscount())->forceCombineWithOtherDiscounts();
+        $discount3 = (new AmountOffOrderDiscount())->combineWithOtherDiscounts();
+
         $this->engine()
-            ->addDiscount($orderOffDiscount = new AmountOffOrderDiscount)
-            ->addDiscount(($productOffDiscount = new AmountOffProductDiscount)->priority(DiscountPriority::High))
-            ->addDiscount(($buxXGetYDiscount = new BuyXGetAmountOffOfYDiscount)->priority(DiscountPriority::Low));
+            ->addDiscount($discount)
+            ->addDiscount($discount2)
+            ->addDiscount($discount3);
 
-        invade($this->engine())->sortDiscountsByPriority();
+        $groups = $this->engine()->getDiscountsGroups();
+        $this->assertCount(2, $groups);
 
-        $this->assertSame($productOffDiscount, $this->engine()->discounts[0]);
-        $this->assertSame($orderOffDiscount, $this->engine()->discounts[1]);
-        $this->assertSame($buxXGetYDiscount, $this->engine()->discounts[2]);
-    }
+        $key = array_key_first($groups);
+        $this->assertContains($discount, $groups[$key]->discounts);
+        $this->assertContains($discount2, $groups[$key]->discounts);
 
-    #[Test]
-    #[DataProvider('discountsDataProvider')]
-    public function it_determine_the_discounts_that_should_be_applied($factory)
-    {
-        [$discounts, $expectedAppliedDiscount] = call_user_func($factory);
-        foreach ($discounts as $discount) {
-            $this->engine()->addDiscount($discount);
-        }
-
-        $discountsToBeApplied = array_values(
-            invade($this->engine())->determineDiscountsThatShouldBeApplied()
-        );
-        $this->assertCount(count($expectedAppliedDiscount), $discountsToBeApplied);
-
-        foreach ($expectedAppliedDiscount as $key => $appliedDiscount) {
-            $this->assertSame($appliedDiscount, $discountsToBeApplied[$key]);
-        }
-    }
-
-    public static function discountsDataProvider()
-    {
-        return [
-            'Only the highest priority discount will be applied because other discounts are not forced to combine' => [
-                'factory' => function () {
-                    $discounts = [
-                        (new AmountOffProductDiscount)->priority(DiscountPriority::High),
-                        (new AmountOffOrderDiscount)->priority(DiscountPriority::High),
-                        (new BuyXGetAmountOffOfYDiscount)->priority(DiscountPriority::High),
-                    ];
-
-                    return [$discounts, [$discounts[0]]];
-                },
-            ],
-            'highest priority discount will be applied with the forced discount' => [
-                'factory' => function () {
-                    $discounts = [
-                        (new AmountOffProductDiscount)->priority(DiscountPriority::High),
-                        (new AmountOffOrderDiscount),
-                        (new BuyXGetAmountOffOfYDiscount)->forceCombineWithOtherDiscounts(),
-                    ];
-
-                    return [
-                        $discounts,
-                        [$discounts[0], $discounts[2]],
-                    ];
-                },
-            ],
-            'highest priority discount will be applied with the forced discount and the can be combined discount' => [
-                'factory' => function () {
-                    $discounts = [
-                        (new AmountOffProductDiscount),
-                        (new AmountOffOrderDiscount)->priority(DiscountPriority::High)->combineWithOtherDiscounts(),
-                        (new BuyXGetAmountOffOfYDiscount)->combineWithOtherDiscounts(),
-                        (new BuyXGetAmountOffOfYDiscount)->forceCombineWithOtherDiscounts(),
-                    ];
-
-                    return [
-                        $discounts,
-                        [$discounts[1], $discounts[2], $discounts[3]],
-                    ];
-                },
-            ],
-        ];
+        $key = array_key_last($groups);
+        $this->assertContains($discount3, $groups[$key]->discounts);
+        $this->assertContains($discount2, $groups[$key]->discounts);
     }
 
     #[Test]
     public function it_works()
     {
-        $twentyPercentOff = (new AmountOffOrderDiscount('twenty percent off'))
-            ->forceCombineWithOtherDiscounts()
-            ->amount(20)
-            ->limitToItems(
-                fn(array $items) => array_filter(
-                    $items,
-                    fn(Item $item) => $item->type == 'product'
-                )
-            );
+        $discount = (new AmountOffOrderDiscount())->amount(20);
+        $discount2 = (new AmountOffOrderDiscount())->amount(10)->forceCombineWithOtherDiscounts();
+        $discount3 = (new AmountOffOrderDiscount())->amount(30)->combineWithOtherDiscounts();
 
-        // this one won't be applied because it'll be applied after amount off product which will make the purchase amount less than 200
-        $twentyPercentOffLimited = (new AmountOffOrderDiscount('twenty percent off, min purcahse amount > 200'))
-            ->forceCombineWithOtherDiscounts()
-            ->amount(20)
-            ->minPurchaseAmount(200)
-            ->limitToItems(
-                fn(array $items) => array_filter(
-                    $items,
-                    fn(Item $item) => $item->type == 'product'
-                )
-            );
+        $this->engine()
+            ->addDiscount($discount)
+            ->addDiscount($discount2)
+            ->addDiscount($discount3);
 
-        $amountOffProduct = (new AmountOffProductDiscount('10 percent off of all products'))
-            ->priority(DiscountPriority::High)
-            ->amount(10)
-            ->limitToItems(
-                fn(array $items) => array_filter(
-                    $items,
-                    fn(Item $item) => $item->type == 'product'
-                )
-            );
+        $group = $this->engine()->process($this->items());
 
-        $engine = (new DiscountsEngine)
-            ->addDiscount($twentyPercentOff)
-            ->addDiscount($twentyPercentOffLimited)
-            ->addDiscount($amountOffProduct)
-            ->process($this->items());
-
-        $this->assertFalse($engine->hasAllProcessedDiscountsApplied());
-        $this->assertTrue($engine->hasAnyProcessedDiscountsApplied());
-        $this->assertEquals(205, $engine->totalBeforeDiscount());
-        $this->assertEquals(56, $engine->savings());
-        $this->assertEquals(149, $engine->total());
+        // group with the higher discount was applied
+        $this->assertEquals(82, $group->savings());
+        $this->assertContains($discount2, $group->discounts);
+        $this->assertContains($discount3, $group->discounts);
     }
 
     private function engine(): MockInterface|DiscountsEngine
@@ -166,15 +97,5 @@ class DiscountsEngineTest extends TestCase
                 $mock->shouldAllowMockingProtectedMethods();
             })
         );
-    }
-
-    private function keyById(array $items)
-    {
-        $map = [];
-        foreach ($items as $item) {
-            $map[$item->id] = $item;
-        }
-
-        return $map;
     }
 }
