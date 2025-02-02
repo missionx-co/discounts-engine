@@ -73,10 +73,6 @@ class DiscountsEngine
 
         $this->groups = [];
         foreach ($this->discounts as $discount) {
-            if ($discount->forceCombineWithOtherDiscounts) {
-                continue;
-            }
-
             $group = new DiscountsGroup($this->getDiscountsThatCanBeCombinedWithDiscount($discount));
             if (isset($this->groups[$group->id()])) {
                 continue;
